@@ -15,7 +15,7 @@ Y=512
 whisperModel = "openai/whisper-large-v3" #choices=["tiny", "base", "small", "medium", "large"]
 whisperDevice = 'cuda' #'cpu' or 'cuda'
 
-big=True  #set big=True for 16gb graphics cards
+big=False  #set big=True for 16gb graphics cards
 if big:
     overscale=2 #adjust to fill your screen
     sdModel = "stabilityai/sdxl-turbo"
