@@ -1,19 +1,23 @@
 # realtime audio to image with a christmas theme using Stable Diffusion Turbo and Whsiper 
 # by Ed Fries
 # public domain
+# realtime whisper audio code modified from: https://github.com/davabase/whisper_real_time
 
 #requirements:
-#pip install --quiet --upgrade diffusers transformers accelerate
-# realtime whisper audio code modified from: https://github.com/davabase/whisper_real_time
+#pip install --quiet --upgrade diffusers transformers accelerate pygame
+
 
 import pygame, random, sys, torch
 from diffusers import AutoPipelineForText2Image
 
+# Change these variables to customize your experience
 bonusPrompt = "a christmas themed " # this string is prepended to the prompt sent to SD. Change to anything you want to give your pictures a consistent theme
 X=512       # you can use a larger size but SD Turbo makes better images at 512x512 resolution
 Y=512
-whisperModel = "openai/whisper-large-v3" #choices=["tiny", "base", "small", "medium", "large"]
+whisperModel = "openai/whisper-large-v3" 
 whisperDevice = 'cuda' #'cpu' or 'cuda'
+runLocal = False    # Set this to True to run without needing to be connected to the internet.
+timeoutLength = 5   # This changes how long it collects audio information before passing it to Whisper. Try 5 for short phrases, 15 for longer phrases.
 
 big=False  #set big=True for 16gb graphics cards
 if big:
@@ -25,7 +29,7 @@ else:
 
 def InitRender():
     global pipe, font, scrn, info
-    pipe = AutoPipelineForText2Image.from_pretrained(sdModel, torch_dtype=torch.float16, use_safetensors=True, variant="fp16")
+    pipe = AutoPipelineForText2Image.from_pretrained(sdModel, torch_dtype=torch.float16, use_safetensors=True, variant="fp16", local_files_only = runLocal)
     pipe = pipe.to("cuda")
     font = pygame.font.Font('freesansbold.ttf', 12)
     info = pygame.display.Info()
@@ -81,7 +85,7 @@ def init_hear_text():
     argsmodel = whisperModel
     argsnon_english = False
     argsenergy_threshold = 1000
-    argsrecord_timeout = 5
+    argsrecord_timeout = timeoutLength
     argsphrase_timeout = 3
     
     # Thread safe Queue for passing data from the threaded recording callback.
@@ -120,7 +124,6 @@ def init_hear_text():
         recorder.adjust_for_ambient_noise(source)
 
     def record_callback(_, audio:sr.AudioData) -> None:
-        # Grab the raw bytes and push it into the thread safe queue.
         data = audio.get_raw_data()
         data_queue.put(data)
 
@@ -174,11 +177,11 @@ def hear_text():
                 else:
                     transcription[-1] = text
             pygame.event.pump()
-
         except KeyboardInterrupt:
             return("QUIT")
             break
 
+# main program starts here
 pygame.init()
 init_hear_text()
 InitRender()
