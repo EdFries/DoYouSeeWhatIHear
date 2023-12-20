@@ -15,10 +15,10 @@ Y=512
 whisperModel = "openai/whisper-large-v3" #choices=["tiny", "base", "small", "medium", "large"]
 whisperDevice = 'cuda' #'cpu' or 'cuda'
 
-big=False  #set big=True for 16gb graphics cards
+big=True  #set big=True for 16gb graphics cards
 if big:
     overscale=2 #adjust to fill your screen
-    sdModel = "stabilityai/sd-xlturbo"
+    sdModel = "stabilityai/sdxl-turbo"
 else:
     overscale=1.5
     sdModel = "stabilityai/sd-turbo"
@@ -81,7 +81,7 @@ def init_hear_text():
     argsmodel = whisperModel
     argsnon_english = False
     argsenergy_threshold = 1000
-    argsrecord_timeout = 15
+    argsrecord_timeout = 5
     argsphrase_timeout = 3
     
     # Thread safe Queue for passing data from the threaded recording callback.
